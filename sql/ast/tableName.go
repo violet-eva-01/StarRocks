@@ -41,6 +41,16 @@ func NewTable(catalog, db, tbl string, pos NodePosition) *Table {
 	}
 }
 
+func (t *Table) GetTableName() string {
+	var sb strings.Builder
+	if t.db != "" {
+		sb.WriteString(t.db)
+		sb.WriteString(".")
+	}
+	sb.WriteString(t.tbl)
+	return sb.String()
+}
+
 func (t *Table) GetDb() string {
 	return t.db
 }

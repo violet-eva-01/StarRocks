@@ -5,43 +5,41 @@ import (
 	"strings"
 )
 
-type Table struct {
+type TableName struct {
 	catalog string
-	tbl     string
 	db      string
-	pos     NodePosition
+	tbl     string
 }
 
-func NewTableWithQualifiedName(catalog, database string, qualifiedName QualifiedName) *Table {
+func NewTableNameWithQualifiedName(catalog, database string, qualifiedName QualifiedName) *TableName {
 	parts := qualifiedName.GetParts()
 	if len(parts) == 3 {
-		return NewTable(parts[0], parts[1], parts[2], qualifiedName.GetPos())
+		return NewTableName(parts[0], parts[1], parts[2])
 	} else if len(parts) == 2 {
-		return NewTable(catalog, qualifiedName.GetParts()[0], qualifiedName.GetParts()[1],
-			qualifiedName.GetPos())
+		return NewTableName(catalog, parts[0], parts[1])
 	} else if len(parts) == 1 {
-		return NewTable(catalog, database, qualifiedName.GetParts()[0], qualifiedName.GetPos())
+		return NewTableName(catalog, database, parts[0])
 	}
-	return &Table{}
+	return &TableName{}
 }
 
 func clean(str string) string {
-	str = strings.ToLower(str)
-	str = strings.ReplaceAll(str, "`", "")
-	return str
+	if isCaseSensitive {
+		return strings.Trim(str, "`")
+	} else {
+		return strings.Trim(strings.ToLower(str), "`")
+	}
 }
 
-func NewTable(catalog, db, tbl string, pos NodePosition) *Table {
-	return &Table{
+func NewTableName(catalog, db, tbl string) *TableName {
+	return &TableName{
 		catalog: clean(catalog),
 		db:      clean(db),
 		tbl:     clean(tbl),
-
-		pos: pos,
 	}
 }
 
-func (t *Table) GetTableName() string {
+func (t *TableName) GetTableName() string {
 	var sb strings.Builder
 	if t.db != "" {
 		sb.WriteString(t.db)
@@ -51,23 +49,31 @@ func (t *Table) GetTableName() string {
 	return sb.String()
 }
 
-func (t *Table) GetDb() string {
-	return t.db
+func (t *TableName) SetCatalog(catalog string) {
+	t.catalog = catalog
 }
 
-func (t *Table) GetTbl() string {
-	return t.tbl
-}
-
-func (t *Table) GetCatalog() string {
+func (t *TableName) GetCatalog() string {
 	return t.catalog
 }
 
-func (t *Table) GetPos() NodePosition {
-	return t.pos
+func (t *TableName) SetDb(db string) {
+	t.db = db
 }
 
-func (t *Table) String() string {
+func (t *TableName) GetDb() string {
+	return t.db
+}
+
+func (t *TableName) SetTbl(tbl string) {
+	t.tbl = tbl
+}
+
+func (t *TableName) GetTbl() string {
+	return t.tbl
+}
+
+func (t *TableName) String() string {
 	var sb strings.Builder
 	if t.catalog != "" {
 		sb.WriteString(t.catalog)
@@ -77,11 +83,13 @@ func (t *Table) String() string {
 		sb.WriteString(t.db)
 		sb.WriteString(".")
 	}
-	sb.WriteString(t.tbl)
+	if t.tbl != "" {
+		sb.WriteString(t.tbl)
+	}
 	return sb.String()
 }
 
-func (t *Table) ToSql() string {
+func (t *TableName) ToSql() string {
 	var sb strings.Builder
 	if t.catalog != "" {
 		sb.WriteString("`")
@@ -93,8 +101,52 @@ func (t *Table) ToSql() string {
 		sb.WriteString(t.db)
 		sb.WriteString("`.")
 	}
-	sb.WriteString("`")
-	sb.WriteString(t.tbl)
-	sb.WriteString("`")
+	if t.tbl != "" {
+		sb.WriteString("`")
+		sb.WriteString(t.tbl)
+		sb.WriteString("`")
+	}
 	return sb.String()
+}
+
+func (t *TableName) InTableNameList(tblList []TableName) bool {
+	for _, tbl := range tblList {
+		if strings.EqualFold(t.String(), tbl.String()) {
+			return true
+		}
+	}
+	return false
+}
+
+func (t *TableName) IsAllDatabase() bool {
+	if t.db == "*" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (t *TableName) IsAllTable() bool {
+	if t.tbl == "*" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func NewDatabaseWithQualifiedName(catalog string, qualifiedName QualifiedName) *TableName {
+	parts := qualifiedName.GetParts()
+	if len(parts) == 2 {
+		return NewDatabase(parts[0], parts[1])
+	} else if len(parts) == 1 {
+		return NewDatabase(catalog, parts[0])
+	}
+	return &TableName{}
+}
+
+func NewDatabase(catalog, db string) *TableName {
+	return &TableName{
+		catalog: clean(catalog),
+		db:      clean(db),
+	}
 }

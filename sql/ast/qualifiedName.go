@@ -11,16 +11,10 @@ type QualifiedName struct {
 	catalog  string
 	database string
 	parts    []string
-	pos      NodePosition
 }
 
-// NewQualifiedName 创建 QualifiedName 实例，不带位置参数
+// NewQualifiedName 创建 QualifiedName 实例
 func NewQualifiedName(originalParts []string) QualifiedName {
-	return NewQualifiedNameWithPos(originalParts, Zero)
-}
-
-// NewQualifiedNameWithPos 创建 QualifiedName 实例，带位置参数
-func NewQualifiedNameWithPos(originalParts []string, pos NodePosition) QualifiedName {
 	if originalParts == nil {
 		panic("originalParts is null")
 	}
@@ -32,7 +26,6 @@ func NewQualifiedNameWithPos(originalParts []string, pos NodePosition) Qualified
 	copy(partsCopy, originalParts)
 	return QualifiedName{
 		parts: partsCopy,
-		pos:   pos,
 	}
 }
 
@@ -40,7 +33,6 @@ func GetQualifiedName(ctx antlr.ParserRuleContext) QualifiedName {
 	var (
 		parts []string
 	)
-	pos := CreatePos(ctx)
 	for _, v := range ctx.GetChildren() {
 		switch v.(type) {
 		case antlr.TerminalNode:
@@ -48,32 +40,26 @@ func GetQualifiedName(ctx antlr.ParserRuleContext) QualifiedName {
 			if node.GetSymbol().GetTokenType() == parser.StarRocksParserDOT_IDENTIFIER {
 				parts = append(parts, node.GetText()[1:])
 			}
+		case parser.IIdentifierOrStringOrStarContext:
+			identifier := v.(parser.IIdentifierOrStringOrStarContext).Identifier()
+			parts = append(parts, identifier.GetText())
 		case parser.IIdentifierContext:
-			context := v.(parser.IIdentifierContext)
-			identifier := context
+			identifier := v.(parser.IIdentifierContext)
 			parts = append(parts, identifier.GetText())
 		}
 	}
 
-	return NewQualifiedNameWithPos(parts, pos)
+	return NewQualifiedName(parts)
 }
 
-// GetParts 获取 parts 字段
 func (qn QualifiedName) GetParts() []string {
 	return qn.parts
 }
 
-// String 实现 Stringer 接口
 func (qn QualifiedName) String() string {
 	return strings.Join(qn.parts, ".")
 }
 
-// GetPos 获取 pos 字段
-func (qn QualifiedName) GetPos() NodePosition {
-	return qn.pos
-}
-
-// ToSql 实现 ParseNode 接口的 ToSql 方法
 func (qn QualifiedName) ToSql() string {
 	return qn.String()
 }

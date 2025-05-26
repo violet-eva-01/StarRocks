@@ -4677,7 +4677,7 @@ func StarRocksParserInit() {
 	staticData.once.Do(starrocksParserInit)
 }
 
-// NewStarRocksParser produces a new parser instance for the optional input antlr.TokenStream.
+// NewStarRocksParser produces a new parser instance for the optional input parser.TokenStream.
 func NewStarRocksParser(input antlr.TokenStream) *StarRocksParser {
 	StarRocksParserInit()
 	this := new(StarRocksParser)
@@ -4694,7 +4694,7 @@ func NewStarRocksParser(input antlr.TokenStream) *StarRocksParser {
 
 // StarRocksParser tokens.
 const (
-	StarRocksParserEOF                   = antlr.TokenEOF
+	StarRocksParserEOF                       = antlr.TokenEOF
 	StarRocksParserT__0                      = 1
 	StarRocksParserT__1                      = 2
 	StarRocksParserT__2                      = 3
@@ -6469,10 +6469,11 @@ type StatementContext struct {
 
 /*func NewEmptyStatementContext() *StatementContext {
 	var p = new(StatementContext)
-	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	parser.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = StarRocksParserRULE_statement
 	return p
 }*/
+
 
 func InitEmptyStatementContext(p *StatementContext) {
 	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
@@ -79758,7 +79759,7 @@ func (s *GrantOnPrimaryObjContext) Accept(visitor antlr.ParseTreeVisitor) interf
 	}
 }
 
-type  GrantOnTableBriefContext struct {
+type GrantOnTableBriefContext struct {
 	GrantPrivilegeStatementContext
 }
 

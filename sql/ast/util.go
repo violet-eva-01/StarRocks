@@ -1,11 +1,15 @@
 // Package ast @author: Violet-Eva @date  : 2025/5/8 @notes :
 package ast
 
-func findIndex(str string, strArr []string) int {
-	for index, element := range strArr {
-		if str == element {
-			return index
+type t interface {
+	PrivilegeType | CreatePrivilegeType | PrivilegeObjectType | PrivilegeObjectTypePlural | AuthZType | privilegeOnType
+}
+
+func findName[T t](input T, slice map[string]T) string {
+	for k, v := range slice {
+		if v == input {
+			return k
 		}
 	}
-	return -1
+	return ""
 }

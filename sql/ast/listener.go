@@ -8,12 +8,24 @@ import (
 )
 
 var (
-	//  isCaseSensitive -> TableName
-	isCaseSensitive = false
+	//  tblCaseSensitive -> TableName
+	tblCaseSensitive = false
+	// userVarCaseSensitive -> user properties
+	userVarCaseSensitive = false
+	// sysVarCaseSensitive -> system variables
+	sysVarCaseSensitive = false
 )
 
 func SetCaseSensitive() {
-	isCaseSensitive = true
+	tblCaseSensitive = true
+}
+
+func SetVarCaseSensitive() {
+	userVarCaseSensitive = true
+}
+
+func SetSysVarCaseSensitive() {
+	sysVarCaseSensitive = true
 }
 
 const (
@@ -474,15 +486,33 @@ func (l *Listener) EnterSetUserVar(ctx *parser.SetUserVarContext) {
 	if variable == l.defaultGrantVar {
 		l.policyName = value
 	}
+	if !userVarCaseSensitive {
+		variable = strings.ToLower(variable)
+		value = strings.ToLower(value)
+	}
 	l.UserProperties[variable] = value
 }
 
 func (l *Listener) EnterSetSystemVar(ctx *parser.SetSystemVarContext) {
-	variable := ctx.Identifier().GetText()
-	if ctx.SetExprOrDefault().DEFAULT() == nil {
-		value := ctx.SetExprOrDefault().Expression().GetText()
-		l.SystemVariables[variable] = value
+	var (
+		variable string
+		value    string
+	)
+	if sv := ctx.SystemVariable(); sv != nil {
+		variable = sv.Identifier().GetText()
+	} else {
+		variable = ctx.Identifier().GetText()
 	}
+	if ctx.SetExprOrDefault().DEFAULT() == nil {
+		value = strings.Trim(ctx.SetExprOrDefault().Expression().GetText(), "'\"")
+	} else {
+		value = "DEFAULT"
+	}
+	if !sysVarCaseSensitive {
+		variable = strings.ToLower(variable)
+		value = strings.ToLower(value)
+	}
+	l.SystemVariables[variable] = value
 }
 
 func (l *Listener) EnterGrantRoleToUser(ctx *parser.GrantRoleToUserContext) {

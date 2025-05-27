@@ -691,9 +691,22 @@ set exec_mem_limit=1024*1024,exec_mem_limit=2048*10,@var1="test1";
 `
 	ast.SetCaseSensitive()
 	parser2 := NewParser(query2, "dc", "ddb")
-	for priv, tbs := range parser2.GetActionTables() {
-		for tb, tbCount := range tbs {
-			fmt.Printf("priv[%s] tb[%s] count[%d]\n", priv, tb.String(), tbCount)
-		}
+	for priv, tbs := range parser2.GetSystemVariables() {
+		fmt.Println(priv, ":", tbs)
+	}
+	for priv, tbs := range parser2.GetUserProperties() {
+		fmt.Println(priv, ":", tbs)
+	}
+	query3 := `
+set @@sql_select_limit=DEFAULT;SET SQL_SELECT_LIMIT=DEFAULT;
+`
+	ast.SetCaseSensitive()
+	ast.SetSysVarCaseSensitive()
+	parser3 := NewParser(query3, "dc", "ddb")
+	for priv, tbs := range parser3.GetSystemVariables() {
+		fmt.Println(priv, ":", tbs)
+	}
+	for priv, tbs := range parser3.GetUserProperties() {
+		fmt.Println(priv, ":", tbs)
 	}
 }

@@ -24,7 +24,7 @@ func NewTableNameWithQualifiedName(catalog, database string, qualifiedName Quali
 }
 
 func clean(str string) string {
-	if isCaseSensitive {
+	if tblCaseSensitive {
 		return strings.Trim(str, "`")
 	} else {
 		return strings.Trim(strings.ToLower(str), "`")

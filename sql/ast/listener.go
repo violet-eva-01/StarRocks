@@ -2,6 +2,7 @@
 package ast
 
 import (
+	"fmt"
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/violet-eva-01/StarRocks/sql/parser"
 	"strings"
@@ -54,7 +55,10 @@ type Listener struct {
 	defaultGrantVar string
 	policyName      string
 	authZs          []AuthZ
+	HasError        bool
+	ErrorMsg        string
 	*parser.BaseStarRocksListener
+	*antlr.DefaultErrorListener
 }
 
 func NewListener() *Listener {
@@ -67,6 +71,18 @@ func NewListener() *Listener {
 		UserProperties:  make(map[string]string),
 		SystemVariables: make(map[string]string),
 	}
+}
+
+func (l *Listener) SyntaxError(
+	recognizer antlr.Recognizer,
+	offendingSymbol interface{},
+	line, column int,
+	msg string,
+	e antlr.RecognitionException,
+) {
+	l.HasError = true
+	l.ErrorMsg = fmt.Sprintf("语法错误: 第%d行第%d列: %s", line, column, msg)
+	panic(l.ErrorMsg)
 }
 
 func (l *Listener) SetCatalog(catalog string) {

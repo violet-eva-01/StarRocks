@@ -7,18 +7,25 @@ import (
 	"github.com/violet-eva-01/StarRocks/sql/parser"
 )
 
-func NewParser(query string, catalog string, dbName string) *ast.Listener {
+func NewParser(query string, catalog string, dbName string) (al *ast.Listener) {
+	listener := ast.NewListener()
 	starRocksStream := antlr.NewInputStream(query)
 	lexer := parser.NewStarRocksLexer(starRocksStream)
 	tokenStream := antlr.NewCommonTokenStream(lexer, 0)
 	starRocksParser := parser.NewStarRocksParser(tokenStream)
-	listener := ast.NewListener()
 	if catalog != "" {
 		listener.SetCatalog(catalog)
 	}
 	if dbName != "" {
 		listener.SetDatabase(dbName)
 	}
+	starRocksParser.RemoveErrorListeners()
+	starRocksParser.AddErrorListener(listener)
+	defer func() {
+		if err := recover(); err != nil {
+			al = listener
+		}
+	}()
 	antlr.ParseTreeWalkerDefault.Walk(listener, starRocksParser.SqlStatements())
 	return listener
 }

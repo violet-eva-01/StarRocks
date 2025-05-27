@@ -201,6 +201,17 @@ WITH RESOURCE 'my_spark';
 			fmt.Printf("priv[%s] tb[%+v] count[%d]\n", priv, tb.String(), tbCount)
 		}
 	}
+	query3 := "LOAD LABEL `dbname`.`label` (DATA INFILE ('cosn://axxx-111111/tmp/*/*') INTO TABLE test1 COLUMNS FROM PATH AS (ts) (`a`, `b`, `c`) SET (`ts` = `a`, `hive_ts` = `ts`)) WITH BROKER hdfs_broker (\"fs.cosn.userinfo.region\"  =  \"ap-hihi\", \"qcloud.object.storage.kerberos.principal\"  =  \"hadoop/_HOST@xxxxx\", \"fs.cosn.bucket.endpoint_suffix\"  =  \"cos.ap-hihi.myqcloud.com\", \"fs.cosn.credentials.provider\"  =  \"org.apache.hadoop.fs.auth.RangerCredentialsProvider\", \"hadoop.security.authentication\"  =  \"kerberos\", \"kerberos_principal\"  =  \"xxxx@xxxx\", \"fs.ofs.tmp.cache.dir\"  =  \"/tmp\", \"qcloud.object.storage.ranger.service.address\"  =  \"xxxx:9999,xxxx:9999\", \"kerberos_keytab\"  =  \"xxx.keytab\", \"fs.cosn.trsf.fs.ofs.user.appid\"  =  \"xxx\")"
+	parser3 := NewParser(query3, "violet", "eva")
+	if !parser3.HasError {
+		for priv, tbs := range parser3.GetActionTables() {
+			for tb, tbCount := range tbs {
+				fmt.Printf("priv[%s] tb[%+v] count[%d]\n", priv, tb.String(), tbCount)
+			}
+		}
+	} else {
+		fmt.Println(parser3.ErrorMsg)
+	}
 }
 
 func TestWithSelectParser(t *testing.T) {

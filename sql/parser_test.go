@@ -686,4 +686,14 @@ set exec_mem_limit=1024*1024,exec_mem_limit=2048*10,@var1="test1";
 	for priv, tbs := range parser1.GetUserProperties() {
 		fmt.Println(priv, ":", tbs)
 	}
+	query2 := `
+/* ApplicationName=DBeaver 22.0.1 - SQLEditor <Script-72.sql> */ SET SQL_SELECT_LIMIT=DEFAULT
+`
+	ast.SetCaseSensitive()
+	parser2 := NewParser(query2, "dc", "ddb")
+	for priv, tbs := range parser2.GetActionTables() {
+		for tb, tbCount := range tbs {
+			fmt.Printf("priv[%s] tb[%s] count[%d]\n", priv, tb.String(), tbCount)
+		}
+	}
 }

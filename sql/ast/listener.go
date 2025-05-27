@@ -479,8 +479,10 @@ func (l *Listener) EnterSetUserVar(ctx *parser.SetUserVarContext) {
 
 func (l *Listener) EnterSetSystemVar(ctx *parser.SetSystemVarContext) {
 	variable := ctx.Identifier().GetText()
-	value := ctx.SetExprOrDefault().Expression().GetText()
-	l.SystemVariables[variable] = value
+	if ctx.SetExprOrDefault().DEFAULT() == nil {
+		value := ctx.SetExprOrDefault().Expression().GetText()
+		l.SystemVariables[variable] = value
+	}
 }
 
 func (l *Listener) EnterGrantRoleToUser(ctx *parser.GrantRoleToUserContext) {

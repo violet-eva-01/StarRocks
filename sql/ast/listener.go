@@ -154,6 +154,30 @@ func (l *Listener) GetTableNameWithTableName(strAction string, tbl TableName) {
 	}
 }
 
+// Admin Statement
+
+func (l *Listener) EnterAdminCancelRepairTableStatement(ctx *parser.AdminCancelRepairTableStatementContext) {
+	l.GetTableNameWithAction("OPERATE", ctx.QualifiedName())
+}
+
+func (l *Listener) EnterAdminRepairTableStatement(ctx *parser.AdminRepairTableStatementContext) {
+	l.GetTableNameWithAction("OPERATE", ctx.QualifiedName())
+}
+func (l *Listener) EnterAdminSetPartitionVersionStatement(ctx *parser.AdminSetPartitionVersionContext) {
+	l.GetTableNameWithAction("OPERATE", ctx.QualifiedName())
+}
+func (l *Listener) EnterAdminShowReplicaDistributionStatement(ctx *parser.AdminShowReplicaDistributionStatementContext) {
+	if ctx.FROM() != nil {
+		l.GetTableNameWithAction("OPERATE", ctx.QualifiedName())
+	}
+}
+
+func (l *Listener) EnterAdminShowReplicaStatusStatement(ctx *parser.AdminShowReplicaStatusStatementContext) {
+	if ctx.FROM() != nil {
+		l.GetTableNameWithAction("OPERATE", ctx.QualifiedName())
+	}
+}
+
 // Analyze Statement
 
 func (l *Listener) EnterAnalyzeStatement(ctx *parser.AnalyzeStatementContext) {
@@ -357,6 +381,12 @@ func (l *Listener) EnterShowTabletStatement(ctx *parser.ShowTabletStatementConte
 
 func (l *Listener) EnterRefreshTableStatement(ctx *parser.RefreshTableStatementContext) {
 	l.GetTableNameWithAction(ctx.REFRESH().GetText(), ctx.QualifiedName())
+}
+
+func (l *Listener) EnterShowDataStatement(ctx *parser.ShowDataStmtContext) {
+	if ctx.FROM() != nil {
+		l.GetTableNameWithAction("SELECT", ctx.QualifiedName())
+	}
 }
 
 // View Statement

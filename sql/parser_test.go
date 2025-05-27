@@ -709,4 +709,16 @@ set @@sql_select_limit=DEFAULT;SET SQL_SELECT_LIMIT=DEFAULT;
 	for priv, tbs := range parser3.GetUserProperties() {
 		fmt.Println(priv, ":", tbs)
 	}
+	query4 := `
+/* App */ SET SQL_SELECT_LIMIT=DEFAULT
+`
+	ast.SetCaseSensitive()
+	ast.SetSysVarCaseSensitive()
+	parser4 := NewParser(query4, "dc", "ddb")
+	for priv, tbs := range parser4.GetSystemVariables() {
+		fmt.Println(priv, ":", tbs)
+	}
+	for priv, tbs := range parser4.GetUserProperties() {
+		fmt.Println(priv, ":", tbs)
+	}
 }

@@ -9,8 +9,15 @@ import (
 
 func NewParser(query string, catalog string, dbName string) (al *ast.Listener) {
 	listener := ast.NewListener()
+	defer func() {
+		if err := recover(); err != nil {
+			al = listener
+		}
+	}()
 	starRocksStream := antlr.NewInputStream(query)
 	lexer := parser.NewStarRocksLexer(starRocksStream)
+	lexer.RemoveErrorListeners()
+	lexer.AddErrorListener(listener)
 	tokenStream := antlr.NewCommonTokenStream(lexer, 0)
 	starRocksParser := parser.NewStarRocksParser(tokenStream)
 	if catalog != "" {
@@ -21,11 +28,6 @@ func NewParser(query string, catalog string, dbName string) (al *ast.Listener) {
 	}
 	starRocksParser.RemoveErrorListeners()
 	starRocksParser.AddErrorListener(listener)
-	defer func() {
-		if err := recover(); err != nil {
-			al = listener
-		}
-	}()
 	antlr.ParseTreeWalkerDefault.Walk(listener, starRocksParser.SqlStatements())
 	return listener
 }

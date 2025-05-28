@@ -733,3 +733,12 @@ set @@sql_select_limit=DEFAULT;SET SQL_SELECT_LIMIT=DEFAULT;
 		fmt.Println(priv, ":", tbs)
 	}
 }
+
+func TestLexer(t *testing.T) {
+	query := "select * from tbl '"
+	ast.SetCaseSensitive()
+	parser := NewParser(query, "dc", "ddb")
+	if parser.HasError {
+		fmt.Println(parser.ErrorMsg)
+	}
+}
